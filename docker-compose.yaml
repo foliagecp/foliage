@@ -1,0 +1,188 @@
+version: '3'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:${KAFKA_ZOOKEEPER_VERSION:-latest}
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+    ports:
+      - "2181:2181"
+    networks:
+      default:
+        aliases:
+          - zookeeper
+    healthcheck:
+      test: "nc -z localhost 2181"
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  kafka:
+    image: confluentinc/cp-kafka:${KAFKA_ZOOKEEPER_VERSION:-latest}
+    hostname: kafka
+      - 'kafka:/kafka'
+    ports:
+      - "${KAFKA_INTERNAL_PORT:-9092}:${KAFKA_INTERNAL_PORT:-9092}"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - kafka
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: EXTERNAL://${KAFKA_EXTERNAL_HOST}:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: EXTERNAL
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_MESSAGE_MAX_BYTES: ${MAX_MESSAGE_SIZE_BYTES:-52428800} # set message.max.bytes to MAX_MESSAGE_SIZE_BYTES
+      KAFKA_MAX_REQUEST_SIZE: ${MAX_MESSAGE_SIZE_BYTES:-52428800} # set max.request.size to MAX_MESSAGE_SIZE_BYTES
+      KAFKA_PRODUCER_MAX_REQUEST_SIZE: ${MAX_MESSAGE_SIZE_BYTES:-52428800} # set producer max.request.size to MAX_MESSAGE_SIZE_BYTES
+      CONNECT_PRODUCER_MAX_REQUEST_SIZE: ${MAX_MESSAGE_SIZE_BYTES:-52428800} # set producer max.request.size to MAX_MESSAGE_SIZE_BYTES
+    healthcheck:
+      test: "kafka-topics --list --bootstrap-server localhost:9092"
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  arangodb:
+    image: 'arangodb/arangodb:3.10.2'
+    hostname: arangodb
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - 'arangodb:/var/lib/arangodb3'
+    ports:
+      - '8529:8529'
+    networks:
+      default:
+        aliases:
+          - arangodb
+    environment:
+      ARANGO_ROOT_PASSWORD: '${ARANGO_ROOT_PASSWORD}'
+    restart: always
+    cap_add: 
+      - SYS_NICE
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '5'
+    healthcheck:
+      test: "nc -z localhost 8529"
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
+
+  cmdb:
+    image: ghcr.io/foliagecp/cmdb:${CMDB_VERSION:-latest}
+    hostname: cmdb
+    ports:
+      - "31415:31415"
+    depends_on:
+      arangodb:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - cmdb
+    environment:
+      ARANGO_ADDR: ${ARANGO_ADDR}
+      ARANGO_USER: ${ARANGO_USER}
+      ARANGO_PASSWORD: ${ARANGO_ROOT_PASSWORD}
+      CMDB_ADDR: ${CMDB_ADDR}
+      CMDB_PORT: ${CMDB_PORT}
+    healthcheck:
+      test: "nc -z localhost 31415"
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
+
+  proxy:
+    image: ghcr.io/foliagecp/proxy:${PROXY_VERSION:-latest}
+    ports:
+      - "8801:8801"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      cmdb:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - proxy
+    environment:
+      CMDB_ADDR: ${CMDB_ADDR}
+      CMDB_PORT: ${CMDB_PORT}
+    healthcheck:
+      test: "nc -z localhost 8801"
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
+
+  sfmanager:
+    image: apache/flink-statefun:${FLINK_SF_VERSION:-latest}
+    expose:
+      - "6123"
+    ports:
+      - "8081:8081"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      proxy:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - sfmanager
+    environment:
+      ROLE: master
+      MASTER_HOST: sfmanager
+    volumes:
+       - ./flink/modules:/opt/statefun/modules
+       - ./flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
+
+  sfworker:
+    image: apache/flink-statefun:${FLINK_SF_VERSION:-latest}
+    expose:
+      - "6121"
+      - "6122"
+    depends_on:
+      sfmanager:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      proxy:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - sfworker
+    environment:
+      ROLE: worker
+      MASTER_HOST: sfmanager
+    volumes:
+      - ./flink/modules:/opt/statefun/modules
+      - ./flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
+
+networks:
+  default:
+    name: graphlink
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.168.55.0/24
+          gateway: 172.168.55.1
+
+volumes:
+  arangodb: {}
+  Kafka: {}
+

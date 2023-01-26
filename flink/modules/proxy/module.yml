@@ -1,0 +1,12 @@
+kind: io.statefun.endpoints.v2/http
+spec:
+  functions: proxy.foliage/*
+  urlPathTemplate: http://${hostname}:8801/{function.name}
+  maxNumBatchRequests: 1
+  transport:
+    type: io.statefun.transports.v1/async
+    call: 60s
+    connect: 20s
+    pool_ttl: 15s
+    pool_size: 1024
+    payload_max_bytes: 52428800
