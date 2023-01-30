@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foliage-cmdb
+  namespace: foliage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foliage-cmdb
+  template:
+    metadata:
+      labels:
+        app: foliage-cmdb
+    spec:
+      containers:
+      - name: foliage-cmdb
+        image: "ghcr.io/foliagecp/cmdb:v0.1.1"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 31415
+        livenessProbe:
+          tcpSocket:
+            port: 31415
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        env:
+         - name: ARANGO_ADDR
+           value: "http://foliage-arangodb"
+         - name: ARANGO_USER
+           value: "root"
+         - name: ARANGO_PASSWORD
+           value: "foliage"
+         - name: CMDB_ADDR
+           value: "foliage-cmdb"
+         - name: CMDB_PORT
+           value: "31415"

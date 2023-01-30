@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foliage-jobmanager
+  namespace: foliage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: statefun
+      component: master
+  template:
+    metadata:
+      labels:
+        app: statefun
+        component: master
+    spec:
+      containers:
+        - name: master
+          image: ghcr.io/foliagecp/foliage:0.1.0
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: state
+              mountPath: /shared
+            - name: log
+              mountPath: /opt/flink/log/
+          env:
+            - name: ROLE
+              value: master
+            - name: MASTER_HOST
+              value: foliage-jobmanager
+            - name: KAFKA_ADDR
+              value: kafka-cluster-kafka-brokers:9092
+            - name: CMDB_ADDR
+              value: "foliage-cmdb"
+            - name: CMDB_PORT
+              value: "31415"
+          ports:
+            - containerPort: 6123
+              name: rpc
+            - containerPort: 6124
+              name: blob
+            - containerPort: 8081
+              name: ui
+          resources:
+            requests:
+              memory: "1.5Gi"
+          livenessProbe:
+            tcpSocket:
+              port: 6123
+            initialDelaySeconds: 30
+            periodSeconds: 60
+      volumes:
+        - name: state
+          persistentVolumeClaim:
+            claimName: foliage-jobmanager-state
+        - name: log
+          persistentVolumeClaim:
+            claimName: foliage-jobmanager-log

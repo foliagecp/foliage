@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foliage-arangodb
+  namespace: foliage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foliage-arangodb
+  template:
+    metadata:
+      labels:
+        app: foliage-arangodb
+    spec:
+      containers:
+      - name: arangodb-arangodb
+        image: "arangodb/arangodb:3.10.2"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: data
+            mountPath: /data
+        env:
+         - name: ARANGO_ROOT_PASSWORD
+           value: "foliage"
+        ports:
+        - containerPort: 8529
+        livenessProbe:
+          tcpSocket:
+            port: 8529
+          initialDelaySeconds: 30
+          periodSeconds: 60
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: foliage-arangodb
+

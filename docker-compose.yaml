@@ -128,7 +128,7 @@ services:
       start_period: 10s
 
   sfmanager:
-    image: apache/flink-statefun:${FLINK_SF_VERSION:-latest}
+    image: ghcr.io/foliagecp/foliage:${FOLIAGE_VERSION:-latest}
     expose:
       - "6123"
     ports:
@@ -144,13 +144,13 @@ services:
           - sfmanager
     environment:
       ROLE: master
-      MASTER_HOST: sfmanager
-    volumes:
-       - ./flink/modules:/opt/statefun/modules
-       - ./flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
+      MASTER_HOST: ${MASTER_HOST}
+      KAFKA_ADDR: ${KAFKA_ADDR}
+      CMDB_ADDR: ${CMDB_ADDR}
+      CMDB_PORT: ${CMDB_PORT}
 
   sfworker:
-    image: apache/flink-statefun:${FLINK_SF_VERSION:-latest}
+    image: ghcr.io/foliagecp/foliage:${FOLIAGE_VERSION:-latest}
     expose:
       - "6121"
       - "6122"
@@ -167,10 +167,10 @@ services:
           - sfworker
     environment:
       ROLE: worker
-      MASTER_HOST: sfmanager
-    volumes:
-      - ./flink/modules:/opt/statefun/modules
-      - ./flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
+      MASTER_HOST: ${MASTER_HOST}
+      KAFKA_ADDR: ${KAFKA_ADDR}
+      CMDB_ADDR: ${CMDB_ADDR}
+      CMDB_PORT: ${CMDB_PORT}
 
 networks:
   default:

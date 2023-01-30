@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: foliage-arangodb
+  labels:
+    name: foliage-arangodb
+spec:
+  type: ClusterIP
+  ports:
+    - name: foliage-arangodb
+      port: 80
+      protocol: TCP
+      targetPort: 8529
+  selector:
+    app: foliage-arangodb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: foliage-arangodb-external
+  labels:
+    name: foliage-arangodb
+spec:
+  type: NodePort
+  ports:
+    - name: foliage-arangodb-external
+      port: 80
+      protocol: TCP
+      targetPort: 8529
+  selector:
+    app: foliage-arangodb

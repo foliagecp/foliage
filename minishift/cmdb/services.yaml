@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: foliage-cmdb
+  labels:
+    name: foliage-cmdb
+spec:
+  type: ClusterIP
+  ports:
+    - name: foliage-cmdb
+      port: 31415
+      protocol: TCP
+      targetPort: 31415
+  selector:
+    app: foliage-cmdb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: foliage-cmdb-external
+  labels:
+    name: foliage-cmdb-external
+spec:
+  type: NodePort
+  ports:
+    - name: foliage-cmdb-external
+      port: 31415
+      protocol: TCP
+      targetPort: 31415
+  selector:
+    app: foliage-cmdb
