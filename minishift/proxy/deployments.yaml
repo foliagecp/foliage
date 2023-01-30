@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foliage-proxy
+  namespace: foliage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foliage-proxy
+  template:
+    metadata:
+      labels:
+        app: foliage-proxy
+    spec:
+      containers:
+      - name: foliage-proxy
+        image: "ghcr.io/foliagecp/proxy:v0.1.1"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8801
+        livenessProbe:
+          tcpSocket:
+            port: 8801
+        env:
+         - name: CMDB_ADDR
+           value: "foliage-cmdb"
+         - name: CMDB_PORT
+           value: "31415"

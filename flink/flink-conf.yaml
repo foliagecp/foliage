@@ -27,6 +27,9 @@ classloader.parent-first-patterns.additional: org.apache.flink.statefun;org.apac
 # For more related configuration options, please see: https://ci.apache.org/projects/flink/flink-docs-master/ops/config.html#fault-tolerance
 #==============================================================================
 
+execution.checkpointing.mode: EXACTLY_ONCE
+execution.checkpointing.interval: 20sec
+
 restart-strategy: fixed-delay
 restart-strategy.fixed-delay.attempts: 3
 restart-strategy.fixed-delay.delay: 1sec
@@ -40,27 +43,18 @@ state.backend.rocksdb.checkpoint.transfer.thread.num: 8
 state.backend.rocksdb.thread.num: 4
 state.backend.incremental: true
 
-metrics.internal.query-service.port: 34561
-#==============================================================================
-# Configure taskmanager.memory.framework.off-heap.size if data is not being transmitted among fsf functions
-#==============================================================================
-taskmanager.memory.framework.off-heap.size: 800mb
+taskmanager.state.local.root-dirs: /shared/local/state/recovery
 
+metrics.internal.query-service.port: 34561
 #==============================================================================
 # Recommended memory configurations. Users may change according to their needs.
 #==============================================================================
 
-jobmanager.memory.process.size: 900mb
+jobmanager.memory.process.size: 1g
+taskmanager.memory.process.size: 1g
 
-taskmanager.memory.process.size: 4g
-taskmanager.numberOfTaskSlots: 20
-
+taskmanager.numberOfTaskSlots: 4
 parallelism.default: 2
-
-heartbeat.interval: 1000
-heartbeat.timeout: 10000
-
-statefun.async.max-per-task: 100000
 
 #==============================================================================
 # Support easy upgrades as the module.yaml file updates
@@ -68,4 +62,3 @@ statefun.async.max-per-task: 100000
 
 #pipeline.auto-generate-uids: false
 execution.savepoint.ignore-unclaimed-state: true
-

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: foliage-proxy
+  labels:
+    name: foliage-proxy
+spec:
+  type: ClusterIP
+  ports:
+    - name: foliage-proxy
+      port: 8801
+      protocol: TCP
+      targetPort: 8801
+  selector:
+    app: foliage-proxy
