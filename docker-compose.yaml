@@ -51,7 +51,7 @@ services:
       start_period: 10s
 
   arangodb:
-    image: 'arangodb/arangodb:3.10.2'
+    image: 'arangodb/arangodb:${ARANGO_VERSION}'
     hostname: arangodb
     volumes:
       - '/etc/localtime:/etc/localtime:ro'

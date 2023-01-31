@@ -3,8 +3,10 @@
 ```
 git clone https://github.com/foliagecp/foliage
 
+cp .env.example .env
+
 # replace ${hostname} to your hostname eg 'MacBook-Pro.local'
-# in file 'flink/modules/proxy/module.yml'
+# in file 'flink/modules/proxy/module.yaml'
 
 # add '127.0.0.1 kafka' to /etc/hosts
 
