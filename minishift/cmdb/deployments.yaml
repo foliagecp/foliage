@@ -16,7 +16,7 @@ spec:
       containers:
       - name: foliage-cmdb
         image: "ghcr.io/foliagecp/cmdb:v0.1.1"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 31415
         livenessProbe:

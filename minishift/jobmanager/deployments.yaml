@@ -18,7 +18,7 @@ spec:
       containers:
         - name: master
           image: ghcr.io/foliagecp/foliage:0.1.0
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           volumeMounts:
             - name: state
               mountPath: /shared

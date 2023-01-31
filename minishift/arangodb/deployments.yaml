@@ -15,11 +15,11 @@ spec:
     spec:
       containers:
       - name: arangodb-arangodb
-        image: "arangodb/arangodb:3.10.2"
-        imagePullPolicy: IfNotPresent
+        image: "arangodb/arangodb:3.8.6"
+        imagePullPolicy: Always
         volumeMounts:
           - name: data
-            mountPath: /data
+            mountPath: /var/lib/arangodb3
         env:
          - name: ARANGO_ROOT_PASSWORD
            value: "foliage"
