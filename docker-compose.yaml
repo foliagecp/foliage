@@ -22,7 +22,7 @@ services:
     hostname: kafka
       - 'kafka:/kafka'
     ports:
-      - "${KAFKA_INTERNAL_PORT:-9092}:${KAFKA_INTERNAL_PORT:-9092}"
+      - 9094:9094
     depends_on:
       zookeeper:
         condition: service_healthy
@@ -32,9 +32,10 @@ services:
           - kafka
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: EXTERNAL://${KAFKA_EXTERNAL_HOST}:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: EXTERNAL
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -116,7 +117,7 @@ services:
     networks:
       default:
         aliases:
-          - proxy
+          - foliage-proxy
     environment:
       CMDB_ADDR: ${CMDB_ADDR}
       CMDB_PORT: ${CMDB_PORT}
