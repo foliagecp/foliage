@@ -5,11 +5,6 @@ git clone https://github.com/foliagecp/foliage
 
 cp .env.example .env
 
-# replace ${hostname} to your hostname eg 'MacBook-Pro.local'
-# in file 'flink/modules/proxy/module.yaml'
-
-# add '127.0.0.1 kafka' to /etc/hosts
-
 docker-compose up -d
 ```
 
@@ -18,6 +13,7 @@ docker-compose up -d
 * install  [qdsl](https://github.com/foliagecp/cmdb/releases/tag/v0.1.1)
 qdsl *.root
 
+export KAFKA_ADDR=127.0.0.1:9094
 git clone https://github.com/foliagecp/go-core
 go run ./cmd/example/system
 
