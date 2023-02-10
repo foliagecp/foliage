@@ -4,6 +4,8 @@
 ```
 git clone https://github.com/foliagecp/foliage
 
+oc new-project foliage
+
 # arangodb
 oc apply -f minishift/arangodb/storages.yaml
 oc apply -f minishift/arangodb/services.yaml
