@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: foliage-proxy
-        image: "ghcr.io/foliagecp/proxy:v0.1.1"
+        image: "ghcr.io/foliagecp/proxy:v0.1.2"
         imagePullPolicy: Always
         ports:
         - containerPort: 8801
