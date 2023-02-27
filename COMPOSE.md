@@ -10,9 +10,10 @@ HOSTNAME=$HOSTNAME docker compose up -d
 ```
 
 ## Test stack
+### install [qdsl](https://github.com/foliagecp/cmdb/releases/latest)
 ```
 export CMDB_ADDR=$HOSTNAME
-* install  [qdsl](https://github.com/foliagecp/cmdb/releases/tag/v0.1.1)
+
 qdsl *.root
 
 export KAFKA_ADDR=$HOSTNAME:9094
