@@ -148,6 +148,12 @@ services:
       KAFKA_ADDR: ${KAFKA_ADDR}
       CMDB_ADDR: ${CMDB_ADDR}
       CMDB_PORT: ${CMDB_PORT}
+    healthcheck:
+      test: curl --fail http://0.0.0.0:51000/livez || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   sfworker:
     image: ghcr.io/foliagecp/foliage:${FOLIAGE_VERSION:-latest}
@@ -171,6 +177,12 @@ services:
       KAFKA_ADDR: ${KAFKA_ADDR}
       CMDB_ADDR: ${CMDB_ADDR}
       CMDB_PORT: ${CMDB_PORT}
+    healthcheck:
+      test: curl --fail http://0.0.0.0:51000/livez || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 networks:
   default:
