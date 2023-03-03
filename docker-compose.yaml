@@ -4,8 +4,6 @@ services:
     image: confluentinc/cp-zookeeper:${KAFKA_ZOOKEEPER_VERSION:-latest}
     environment:
       ZOOKEEPER_CLIENT_PORT: "2181"
-    ports:
-      - "2181:2181"
     networks:
       default:
         aliases:
@@ -106,8 +104,8 @@ services:
 
   proxy:
     image: ghcr.io/foliagecp/proxy:${PROXY_VERSION:-latest}
-    ports:
-      - "8801:8801"
+    expose:
+      - "80"
     depends_on:
       kafka:
         condition: service_healthy
@@ -121,11 +119,11 @@ services:
       CMDB_ADDR: ${CMDB_ADDR}
       CMDB_PORT: ${CMDB_PORT}
     healthcheck:
-      test: "nc -z localhost 8801"
+      test: curl --fail http://0.0.0.0/livez || exit 1
       interval: 10s
       timeout: 5s
-      retries: 8
-      start_period: 10s
+      retries: 5
+      start_period: 30s
 
   sfmanager:
     image: ghcr.io/foliagecp/foliage:${FOLIAGE_VERSION:-latest}
