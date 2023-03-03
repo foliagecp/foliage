@@ -81,7 +81,7 @@ services:
     image: ghcr.io/foliagecp/cmdb:${CMDB_VERSION:-latest}
     hostname: cmdb
     ports:
-      - "31415:31415"
+      - "${CMDB_EXTERNAL_PORT}:${CMDB_PORT}"
     depends_on:
       arangodb:
         condition: service_healthy
@@ -96,7 +96,7 @@ services:
       CMDB_ADDR: ${CMDB_ADDR}
       CMDB_PORT: ${CMDB_PORT}
     healthcheck:
-      test: "nc -z localhost 31415"
+      test: "nc -z localhost ${CMDB_PORT}"
       interval: 10s
       timeout: 5s
       retries: 8
@@ -105,7 +105,7 @@ services:
   proxy:
     image: ghcr.io/foliagecp/proxy:${PROXY_VERSION:-latest}
     expose:
-      - "80"
+      - "${PROXY_PORT}"
     depends_on:
       kafka:
         condition: service_healthy
@@ -116,14 +116,16 @@ services:
         aliases:
           - foliage-proxy
     environment:
+      PROXY_DEBUG: ${PROXY_DEBUG}
+      PROXY_PORT: ${PROXY_PORT}
       CMDB_ADDR: ${CMDB_ADDR}
       CMDB_PORT: ${CMDB_PORT}
     healthcheck:
-      test: curl --fail http://0.0.0.0/livez || exit 1
+      test: curl --fail http://0.0.0.0:${PROXY_PORT}/readyz || exit 1
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 10s
 
   sfmanager:
     image: ghcr.io/foliagecp/foliage:${FOLIAGE_VERSION:-latest}
